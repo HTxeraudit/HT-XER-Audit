@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HT XER-Audit</title>
+<meta name="description" content="برنامج مجاني بالكامل لتحليل برامج Primavera P6 الزمنية ومقارنتها وتحديثها من ملف XER. A free tool to analyse, compare and update Primavera P6 schedules from an XER file.">
+<meta property="og:title" content="HT XER-Audit">
+<meta property="og:description" content="تحليل برامج Primavera P6 ومقارنتها وتحديثها من ملف XER. مجاني بالكامل.">
+<meta property="og:image" content="assets/poster.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23070d24'/%3E%3Ctext x='32' y='45' font-family='Arial' font-size='36' font-weight='800' font-style='italic' text-anchor='middle' fill='%23f0bf52'%3EHT%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#070d24;--navy2:#0d1740;--navy3:#14225c;--line:rgba(150,185,255,.2);--gold:#f0bf52;--gold2:#c98d22;--ink:#eef3ff;--ink2:#b4c1e2;--green:#21d07a;--gutter:16px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--navy);color:var(--ink);font:500 17px/1.75 Cairo,"Segoe UI",Tahoma,sans-serif;-webkit-text-size-adjust:100%}
+[lang=en] body,body.en{font-family:"Segoe UI",Bahnschrift,Tahoma,sans-serif}
+a{color:var(--gold)}
+img,video,iframe{display:block;max-width:100%}
+.wrap{width:min(1120px,100%);margin:auto;padding-inline:var(--gutter)}
+header.top{display:flex;align-items:center;justify-content:space-between;padding-block:18px}
+.logo{direction:ltr;display:inline-flex;align-items:baseline;gap:.3em;font:600 22px Bahnschrift,"Segoe UI",sans-serif;color:#fff;text-decoration:none}
+.logo b{font-weight:800;font-style:italic;font-size:1.34em;color:var(--gold)}
+.lang{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:6px 14px;font:inherit;font-size:15px;cursor:pointer;min-height:40px}
+.lang:hover{border-color:var(--gold)}
+.hero{background:radial-gradient(900px 480px at 50% -10%,#1b3187 0,transparent 70%);text-align:center;padding-block:34px 56px}
+.free{display:inline-block;color:var(--green);border:1px solid rgba(33,208,122,.55);border-radius:999px;padding:2px 16px;font-weight:700;font-size:16px;margin-bottom:14px}
+h1{font-weight:900;font-size:clamp(30px,5.4vw,54px);line-height:1.25;margin:0 0 14px;text-wrap:balance}
+.lead{color:var(--ink2);font-size:clamp(17px,2.2vw,20px);max-width:760px;margin:0 auto 26px;text-wrap:pretty}
+.cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:8px 26px;border-radius:10px;font-weight:700;text-decoration:none;transition:transform .12s,background .12s}
+.btn.pri{background:linear-gradient(180deg,#f8d57e,var(--gold) 45%,var(--gold2));color:#1a1300;font-weight:900}
+.btn.pri:hover{transform:translateY(-1px)}
+.btn.sec{border:1px solid var(--line);color:var(--ink)}
+.btn.sec:hover{border-color:var(--gold)}
+.note{color:var(--ink2);font-size:14.5px;margin-top:12px}
+.video{margin:38px auto 0;max-width:940px;aspect-ratio:16/9;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px var(--line),0 30px 80px rgba(0,0,0,.6);background:#000}
+.video video,.video iframe{width:100%;height:100%;border:0}
+section{padding-block:52px;border-top:1px solid var(--line)}
+h2{font-weight:900;font-size:clamp(25px,3.6vw,34px);line-height:1.3;margin:0 0 8px}
+.sub{color:var(--ink2);margin:0 0 28px;max-width:760px}
+.feature{display:grid;grid-template-columns:1fr 1.25fr;gap:32px;align-items:center;padding-block:24px}
+.feature h3{font-size:23px;font-weight:900;color:var(--gold);margin:0 0 6px;line-height:1.35}
+.feature p{margin:0 0 10px;color:var(--ink2)}
+.feature ul{margin:0;padding-inline-start:20px;color:var(--ink)}
+.feature li{margin-block:3px}
+.shot{border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line),0 18px 50px rgba(0,0,0,.5);background:var(--navy2)}
+.shot img{width:100%;height:auto}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;counter-reset:s}
+.steps li{counter-increment:s;min-width:0}
+.steps li::before{content:counter(s);display:block;font:800 40px Bahnschrift,"Segoe UI",sans-serif;color:var(--gold);line-height:1.2}
+.steps b{display:block;font-size:19px;margin-bottom:4px}
+.steps span{color:var(--ink2)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.facts b{display:block;font-size:19px;color:var(--ink);margin-bottom:2px}
+.facts span{color:var(--ink2)}
+.contact{display:flex;flex-wrap:wrap;gap:12px}
+footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink2);font-size:14px}
+bdi{unicode-bidi:isolate;white-space:nowrap}
+@media (max-width:820px){.feature{grid-template-columns:1fr;gap:16px}.feature .shot{order:2}.steps,.facts{grid-template-columns:1fr;gap:20px}section{padding-block:40px}.btn{width:100%}.contact .btn{width:auto;flex:1 1 auto}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap"><header class="top">
+  <a class="logo" href="#" aria-label="HT XER-Audit"><b>HT</b><span>XER-Audit</span></a>
+  <button class="lang" id="lang" type="button">English</button>
+</header></div>
+
+<main>
+<div class="hero"><div class="wrap">
+  <span class="free" data-t="free"></span>
+  <h1 data-t="h1"></h1>
+  <p class="lead" data-t="lead"></p>
+  <div class="cta">
+    <a class="btn pri" id="dl" href="#start"><span data-t="dl"></span></a>
+    <a class="btn sec" href="#start" data-t="how"></a>
+  </div>
+  <p class="note" data-t="dlnote"></p>
+  <div class="video" id="video"></div>
+</div></div>
+
+<section><div class="wrap">
+  <h2 data-t="fh"></h2>
+  <p class="sub" data-t="fs"></p>
+
+  <div class="feature">
+    <div><h3 data-t="a_h"></h3><p data-t="a_p"></p><ul><li data-t="a_1"></li><li data-t="a_2"></li><li data-t="a_3"></li></ul></div>
+    <div class="shot"><img src="assets/shot_analysis.jpg" width="1400" height="788" loading="lazy" data-alt="a_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="c_h"></h3><p data-t="c_p"></p><ul><li data-t="c_1"></li><li data-t="c_2"></li><li data-t="c_3"></li></ul></div>
+    <div class="shot"><img src="assets/shot_compare.jpg" width="1400" height="788" loading="lazy" data-alt="c_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="r_h"></h3><p data-t="r_p"></p><ul><li data-t="r_1"></li><li data-t="r_2"></li></ul></div>
+    <div class="shot"><img src="assets/shot_letter.jpg" width="1400" height="788" loading="lazy" data-alt="r_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="u_h"></h3><p data-t="u_p"></p><ul><li data-t="u_1"></li><li data-t="u_2"></li><li data-t="u_3"></li></ul></div>
+    <div class="shot"><img src="assets/shot_update.jpg" width="1400" height="788" loading="lazy" data-alt="u_h" alt=""></div>
+  </div>
+  <p class="note" data-t="samples"></p>
+</div></section>
+
+<section><div class="wrap">
+  <h2 data-t="t_h"></h2>
+  <p class="sub" data-t="t_s"></p>
+  <div class="facts">
+    <div><b data-t="t1b"></b><span data-t="t1"></span></div>
+    <div><b data-t="t2b"></b><span data-t="t2"></span></div>
+    <div><b data-t="t3b"></b><span data-t="t3"></span></div>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <h2 data-t="s_h"></h2>
+  <p class="sub" data-t="s_s"></p>
+  <ol class="steps">
+    <li><b data-t="s1b"></b><span data-t="s1"></span></li>
+    <li><b data-t="s2b"></b><span data-t="s2"></span></li>
+    <li><b data-t="s3b"></b><span data-t="s3"></span></li>
+  </ol>
+  <div class="cta" style="margin-top:30px;justify-content:flex-start">
+    <a class="btn pri" id="dl2" href="#start"><span data-t="dl"></span></a>
+    <a class="btn sec" id="gar" href="#start" data-t="gar"></a>
+    <a class="btn sec" id="gen" href="#start" data-t="gen"></a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2 data-t="k_h"></h2>
+  <p class="sub" data-t="k_s"></p>
+  <div class="contact" id="contact"></div>
+</div></section>
+</main>
+
+<footer><div class="wrap" data-t="legal"></div></footer>
+
+<script>
+/* The only lines to edit. EMAIL empty = no e-mail button. YOUTUBE = the id after watch?v= (empty = the video file in assets). */
+const CONFIG = {EMAIL: 'htxeraudit@gmail.com', YOUTUBE: '', REPO: 'HTxeraudit/HT-XER-Audit'};
+
+const T = {
+ar: {
+ free:'مجاني بالكامل · غير هادف للربح', h1:'راجع برامج Primavera P6 الزمنية من ملف XER، دون فتح البريمافيرا',
+ lead:'يذهب مباشرة إلى المشكلات، ويبيّن سببها وأثرها وعلاجها بالعربية والإنجليزية، ويقارن التحديثات، ويكتب خطاب المقاول، ويُعدّ التحديث الدوري في ملف XER جديد.',
+ dl:'تحميل البرنامج لنظام Windows', how:'طريقة التشغيل', dlnote:'ملف مضغوط، نحو 17 ميجابايت. يعمل على Windows 10 أو 11، إصدار 64 بت.',
+ fh:'كل ما يلزم مهندس التخطيط في مكان واحد', fs:'للاستشاري والمقاول ومكاتب ضبط المشروعات: من ملف XER وحده إلى تقرير جاهز.',
+ a_h:'تحليل البرنامج الزمني', a_p:'تقرير كامل من ملف XER واحد، بدرجة جودة واضحة وملاحظات مرتبة حسب الأهمية.',
+ a_1:'برنامج الأساس، والمعدّل، والاستدراكي، والتحديث الدوري', a_2:'فحوص DCMA-14 ومعايير المراجعة', a_3:'القيمة المكتسبة، والعمالة، والتقدم، وعرض الجدول الزمني',
+ c_h:'مقارنة البرامج الزمنية', c_p:'يعرض ما تغيّر فقط: كل نشاط تغيّر، والقيمة القديمة بجانب الجديدة.',
+ c_1:'برنامجان، أو تحديث مع خط الأساس، أو ثلاثة برامج', c_2:'المسار الحرج، والـ Milestones، والأداء الفعلي', c_3:'عدة مشروعات في ملف واحد، تُقارن معًا',
+ r_h:'خطاب المقاول والتقارير', r_p:'خطاب جاهز بملخص المخالفات وأمثلتها، بالعربية أو الإنجليزية، وبشعار شركتكم.',
+ r_1:'الخطاب بصيغة PDF أو Word', r_2:'كل الصفحات إلى Excel أو PDF، بغلاف وفهرس',
+ u_h:'إجراء تحديث على برنامج زمني', u_p:'جديد: تُدخل تقدم الفترة في شاشة واحدة، ويكتب البرنامج ملف XER جديدًا تستورده في البريمافيرا.',
+ u_1:'الإدخال على الشاشة مباشرة، أو من قالب Excel', u_2:'الموارد تتبع النسبة تلقائيًا، وتبقى قابلة للتعديل', u_3:'الملف الأصلي كما هو، ثم Import في P6 والضغط على F9',
+ samples:'الصور من ملفات نموذجية عامة وبأسماء شركات افتراضية.',
+ t_h:'ملفاتكم تبقى عندكم', t_s:'يعمل البرنامج على جهازكم، ولا يرفع ملفات XER أو التقارير إلى أي مكان.',
+ t1b:'لا يمسّ الملف الأصلي', t1:'التحليل والمقارنة قراءة فقط، والتحديث يكتب ملفًا جديدًا منفصلًا.',
+ t2b:'دون إنترنت بعد التفعيل', t2:'الإنترنت مطلوب مرة واحدة لتفعيل البرنامج على الجهاز، ثم يعمل دونه.',
+ t3b:'دون فتح البريمافيرا', t3:'التحليل والمقارنة من ملف XER وحده. أما تطبيق التحديث فيحتاج إلى P6 لاستيراد الملف الجديد.',
+ s_h:'طريقة التشغيل', s_s:'ثلاث خطوات، مرة واحدة على كل جهاز.',
+ s1b:'التحميل وفك الضغط', s1:'حمّل الملف وفكّ ضغطه في مجلد على الجهاز، ولا تشغّل البرنامج من داخل الملف المضغوط.',
+ s2b:'التشغيل', s2:'شغّل HT XER-Audit.exe.‏ البرنامج غير موقّع رقميًا، لذا قد يظهر تحذير Windows: اختر More info ثم Run anyway.‏',
+ s3b:'التفعيل', s3:'أنشئ حسابًا وأكّد بريدك الإلكتروني. بعد الموافقة على طلبك يكتمل التفعيل، ويستمر البرنامج في العمل دون إنترنت.',
+ gar:'دليل المستخدم بالعربية', gen:'User Guide in English',
+ k_h:'تواصلوا معنا', k_s:'التحميل مباشر من هذه الصفحة. ولطلبات التفعيل والأسئلة والملاحظات، البريد الإلكتروني هو وسيلة التواصل الوحيدة.', mail:'البريد الإلكتروني', lang:'English',
+ legal:'<bdi>Primavera</bdi> و <bdi>P6</bdi> علامتان تجاريتان لشركة <bdi>Oracle</bdi>، و <bdi>HT XER-Audit</bdi> برنامج مستقل لا صلة له بها.'
+},
+en: {
+ free:'Completely free · Non-profit', h1:'Review Primavera P6 schedules from the XER file, without opening P6',
+ lead:'It goes straight to the problems and explains their cause, impact and remedy in English and Arabic, compares updates, writes the contractor letter, and prepares the periodic update in a new XER file.',
+ dl:'Download for Windows', how:'How to run it', dlnote:'Zip file, about 17 MB. Windows 10 or 11 (64-bit).',
+ fh:'What a planning engineer needs, in one place', fs:'For consultants, contractors and project controls teams: from an XER file to a finished report.',
+ a_h:'Schedule analysis', a_p:'A full report from one XER file, with a clear quality score and notes ordered by importance.',
+ a_1:'Baseline, Revised, Recovery and periodic Update programmes', a_2:'DCMA-14 checks and review criteria', a_3:'Earned value, manpower, progress and a schedule viewer',
+ c_h:'Schedule comparison', c_p:'It shows only what changed: every changed activity, with the old value beside the new one.',
+ c_1:'Two programmes, an update with its baseline, or three programmes', c_2:'Critical path, Milestones and actual performance', c_3:'Several projects in one file, compared together',
+ r_h:'Contractor letter and reports', r_p:'A ready letter with the summary of findings and examples, in English or Arabic, with your company logo.',
+ r_1:'The letter as PDF or Word', r_2:'Every page to Excel or PDF, with a cover and contents',
+ u_h:'Apply an update to a programme', u_p:'New: enter the period’s progress on one screen, and the program writes a new XER file for you to import into P6.',
+ u_1:'Enter on the screen, or from an Excel template', u_2:'Resources follow the % automatically and stay editable', u_3:'The original file stays as it is; then Import in P6 and press F9',
+ samples:'Pictures are from public sample files, with invented company names.',
+ t_h:'Your files stay with you', t_s:'The program runs on your PC and uploads no XER files or reports anywhere.',
+ t1b:'The original is never touched', t1:'Analysis and comparison only read. The update writes a separate new file.',
+ t2b:'Offline after activation', t2:'Internet is needed once, to activate the program on the PC. After that it works without it.',
+ t3b:'No need to open P6', t3:'Analysis and comparison need only the XER file. Applying an update needs P6 to import the new file.',
+ s_h:'How to run it', s_s:'Three steps, once on each PC.',
+ s1b:'Download and extract', s1:'Download the file and extract it to a folder. Do not run the program from inside the zip.',
+ s2b:'Run', s2:'Run HT XER-Audit.exe. The program is not digitally signed, so Windows may warn you: choose More info, then Run anyway.',
+ s3b:'Activate', s3:'Create an account and confirm your e-mail. Once your request is approved, activation completes and the program keeps working offline.',
+ gar:'دليل المستخدم بالعربية', gen:'User Guide in English',
+ k_h:'Contact', k_s:'Download directly from this page. For activation requests, questions and feedback, e-mail is the only way to reach us.', mail:'E-mail', lang:'العربية',
+ legal:'Primavera and P6 are trademarks of Oracle. HT XER-Audit is an independent program, not connected with Oracle.'
+}};
+
+/* on GitHub Pages the links build themselves from the address: <account>.github.io/<repo>/ */
+function repoPath() {
+  if (CONFIG.REPO) return CONFIG.REPO;
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/), seg = location.pathname.split('/').filter(Boolean)[0];
+  return m && seg ? `${m[1]}/${seg}` : '';
+}
+const repo = repoPath();
+const asset = n => repo ? `https://github.com/${repo}/releases/latest/download/${n}` : '#start';
+['dl', 'dl2'].forEach(id => document.getElementById(id).href = asset('HT-XER-Audit.zip'));
+document.getElementById('gar').href = asset('HT-XER-Audit-User-Guide-AR.pdf');
+document.getElementById('gen').href = asset('HT-XER-Audit-User-Guide-EN.pdf');
+
+const v = document.getElementById('video');
+if (CONFIG.YOUTUBE) v.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(CONFIG.YOUTUBE)}" title="HT XER-Audit" allowfullscreen loading="lazy"></iframe>`;
+else v.innerHTML = '<video controls preload="none" poster="assets/poster.jpg" src="assets/HT-XER-Audit-Promo.mp4"></video>';
+
+function setLang(l) {
+  const t = T[l], root = document.documentElement;
+  root.lang = l; root.dir = l === 'ar' ? 'rtl' : 'ltr'; document.body.classList.toggle('en', l === 'en');
+  document.querySelectorAll('[data-t]').forEach(e => { const k = e.dataset.t; if (k === 'legal') e.innerHTML = t[k]; else e.textContent = t[k]; });
+  document.querySelectorAll('[data-alt]').forEach(e => e.alt = t[e.dataset.alt]);
+  document.getElementById('lang').textContent = t.lang;
+  const c = document.getElementById('contact'); c.replaceChildren();
+  const add = (href, text) => { const a = document.createElement('a'); a.className = 'btn sec'; a.href = href; a.textContent = text; a.rel = 'noopener'; c.append(a); };
+  if (CONFIG.EMAIL) add(`mailto:${CONFIG.EMAIL}`, `${t.mail}: ${CONFIG.EMAIL}`);
+  try { localStorage.setItem('ht-lang', l); } catch (e) {}
+}
+let start = new URLSearchParams(location.search).get('lang');
+if (!T[start]) { try { start = localStorage.getItem('ht-lang'); } catch (e) {} }
+if (!T[start]) start = 'ar';
+setLang(start);
+document.getElementById('lang').onclick = () => setLang(document.documentElement.lang === 'ar' ? 'en' : 'ar');
+</script>
+</body>
+</html>
