@@ -62,17 +62,32 @@ h2{font-weight:900;font-size:clamp(25px,3.6vw,34px);line-height:1.3;margin:0 0 8
 .contact{display:flex;flex-wrap:wrap;gap:12px}
 footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink2);font-size:14px}
 bdi{unicode-bidi:isolate;white-space:nowrap}
+/* 15-Nov-26 two programs on one page: the switch under the header */
+.apps{display:flex;justify-content:center;gap:10px;padding-block:6px 4px;flex-wrap:wrap}
+.app{display:inline-flex;flex-direction:column;align-items:center;min-width:220px;min-height:58px;justify-content:center;padding:8px 22px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink);font:inherit;cursor:pointer;text-decoration:none}
+.app b{font:700 19px/1.2 Bahnschrift,"Segoe UI",sans-serif;direction:ltr}
+.app small{color:var(--ink2);font-size:13.5px;line-height:1.4}
+.app:hover{border-color:var(--gold)}
+.app[aria-selected=true]{background:linear-gradient(180deg,rgba(240,191,82,.16),rgba(240,191,82,.05));border-color:var(--gold);box-shadow:0 0 0 1px rgba(240,191,82,.35)}
+.app[aria-selected=true] b{color:var(--gold)}
+.heroshot{margin:38px auto 0;max-width:940px}
+@media (max-width:820px){.app{min-width:0;flex:1 1 45%}}
 @media (max-width:820px){.feature{grid-template-columns:1fr;gap:16px}.feature .shot{order:2}.steps,.facts{grid-template-columns:1fr;gap:20px}section{padding-block:40px}.btn{width:100%}.contact .btn{width:auto;flex:1 1 auto}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap"><header class="top" dir="ltr">
-  <a class="brand" href="#" aria-label="HT XER-Audit, Engr Hassan Taha"><span class="logo"><b>HT</b><span>XER-Audit</span></span><span class="by">Engr Hassan Taha</span></a>
+  <a class="brand" href="#" aria-label="HT, Engr Hassan Taha"><span class="logo"><b>HT</b><span id="logoName">XER-Audit</span></span><span class="by">Engr Hassan Taha</span></a>
   <button class="lang" id="lang" type="button">English</button>
 </header></div>
+<div class="wrap"><nav class="apps" role="tablist">
+  <a class="app" role="tab" id="tab-xer" href="#xer-audit" data-app="xer"><b>HT XER-Audit</b><small data-t="app_xer"></small></a>
+  <a class="app" role="tab" id="tab-bp" href="#build-plan" data-app="bp"><b>HT Build-Plan</b><small data-t="app_bp"></small></a>
+</nav></div>
 
 <main>
+<div id="p-xer">
 <div class="hero"><div class="wrap">
   <span class="free" data-t="free"></span>
   <h1 data-t="h1"></h1>
@@ -132,6 +147,71 @@ bdi{unicode-bidi:isolate;white-space:nowrap}
     <a class="btn sec" id="gen" href="#start" data-t="gen"></a>
   </div>
 </div></section>
+</div>
+
+<!-- HT Build-Plan (15-Nov-26) -->
+<div id="p-bp" hidden>
+<div class="hero"><div class="wrap">
+  <span class="free" data-t="free"></span>
+  <h1 data-t="b_h1"></h1>
+  <p class="lead" data-t="b_lead"></p>
+  <div class="cta">
+    <a class="btn pri" id="bdl" href="#bstart"><span data-t="dl"></span></a>
+    <a class="btn sec" href="#bstart" data-t="how"></a>
+  </div>
+  <p class="note" data-t="b_dlnote"></p>
+  <div class="shot heroshot"><img src="assets/bp_result.jpg" width="1400" height="788" data-alt="b_res_h" alt=""></div>
+</div></div>
+
+<section><div class="wrap">
+  <h2 data-t="b_fh"></h2>
+  <p class="sub" data-t="b_fs"></p>
+  <div class="feature">
+    <div><h3 data-t="b_rd_h"></h3><p data-t="b_rd_p"></p><ul><li data-t="b_rd_1"></li><li data-t="b_rd_2"></li><li data-t="b_rd_3"></li></ul></div>
+    <div class="shot"><img src="assets/bp_read.jpg" width="1400" height="788" loading="lazy" data-alt="b_rd_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="b_q_h"></h3><p data-t="b_q_p"></p><ul><li data-t="b_q_1"></li><li data-t="b_q_2"></li></ul></div>
+    <div class="shot"><img src="assets/bp_ask.jpg" width="1400" height="788" loading="lazy" data-alt="b_q_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="b_res_h"></h3><p data-t="b_res_p"></p><ul><li data-t="b_res_1"></li><li data-t="b_res_2"></li><li data-t="b_res_3"></li></ul></div>
+    <div class="shot"><img src="assets/bp_result.jpg" width="1400" height="788" loading="lazy" data-alt="b_res_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="b_rep_h"></h3><p data-t="b_rep_p"></p><ul><li data-t="b_rep_1"></li><li data-t="b_rep_2"></li><li data-t="b_rep_3"></li></ul></div>
+    <div class="shot"><img src="assets/bp_report.jpg" width="1400" height="788" loading="lazy" data-alt="b_rep_h" alt=""></div>
+  </div>
+  <div class="feature">
+    <div><h3 data-t="b_acc_h"></h3><p data-t="b_acc_p"></p><ul><li data-t="b_acc_1"></li><li data-t="b_acc_2"></li></ul></div>
+    <div class="shot"><img src="assets/bp_accounts.jpg" width="1400" height="788" loading="lazy" data-alt="b_acc_h" alt=""></div>
+  </div>
+  <p class="note" data-t="b_samples"></p>
+</div></section>
+
+<section><div class="wrap">
+  <h2 data-t="t_h"></h2>
+  <p class="sub" data-t="b_t_s"></p>
+  <div class="facts">
+    <div><b data-t="b_t1b"></b><span data-t="b_t1"></span></div>
+    <div><b data-t="t2b"></b><span data-t="t2"></span></div>
+    <div><b data-t="b_t3b"></b><span data-t="b_t3"></span></div>
+  </div>
+</div></section>
+
+<section id="bstart"><div class="wrap">
+  <h2 data-t="s_h"></h2>
+  <p class="sub" data-t="s_s"></p>
+  <ol class="steps">
+    <li><b data-t="s1b"></b><span data-t="b_s1"></span></li>
+    <li><b data-t="s2b"></b><span data-t="b_s2"></span></li>
+    <li><b data-t="s3b"></b><span data-t="b_s3"></span></li>
+  </ol>
+  <div class="cta" style="margin-top:30px;justify-content:flex-start">
+    <a class="btn pri" id="bdl2" href="#bstart"><span data-t="dl"></span></a>
+  </div>
+</div></section>
+</div>
 
 <section><div class="wrap">
   <h2 data-t="k_h"></h2>
@@ -140,7 +220,7 @@ bdi{unicode-bidi:isolate;white-space:nowrap}
 </div></section>
 </main>
 
-<footer><div class="wrap" data-t="legal"></div></footer>
+<footer><div class="wrap" id="legal"></div></footer>
 
 <script>
 /* The only lines to edit. EMAIL empty = no e-mail button. YOUTUBE = the id after watch?v= (empty = the video file in assets). */
@@ -171,7 +251,30 @@ ar: {
  s3b:'التفعيل', s3:'أنشئ حسابًا وأكّد بريدك الإلكتروني. بعد الموافقة على طلبك يكتمل التفعيل، ويعمل البرنامج دون إنترنت. مدة الترخيص 6 أشهر، ويُجدَّد مجانًا عند الطلب.',
  gar:'دليل المستخدم بالعربية', gen:'User Guide in English',
  k_h:'تواصلوا معنا', k_s:'التحميل مباشر من هذه الصفحة. ولطلبات التفعيل والأسئلة والملاحظات، البريد الإلكتروني هو وسيلة التواصل الوحيدة.', mail:'البريد الإلكتروني', lang:'English',
- legal:'<bdi>Primavera</bdi> و <bdi>P6</bdi> علامتان تجاريتان لشركة <bdi>Oracle</bdi>، و <bdi>HT XER-Audit</bdi> برنامج مستقل لا صلة له بها.'
+ legal:'<bdi>Primavera</bdi> و <bdi>P6</bdi> علامتان تجاريتان لشركة <bdi>Oracle</bdi>، و <bdi>HT XER-Audit</bdi> برنامج مستقل لا صلة له بها.',
+ app_xer:'مراجعة برامج Primavera P6', app_bp:'تقدير وتخطيط المشروعات العقارية',
+ b_h1:'من رسومات العمارة إلى الحصر والتكلفة والبرنامج الزمني',
+ b_lead:'أضِف رسومات AutoCAD أو Revit للعمارة السكنية، فيقرؤها البرنامج كما يقرؤها المهندس: الأساسات والهيكل والمباني والتشطيبات، ثم يُخرج المقايسة والتكلفة والخامات ودراسة الجدوى والبرنامج الزمني في ملف XER لبرنامج Primavera P6.',
+ b_dlnote:'ملف مضغوط، نحو 148 ميجابايت. يعمل على Windows 10 أو 11، إصدار 64 بت.',
+ b_fh:'العمارة كلها في برنامج واحد', b_fs:'للمطوّر العقاري والمقاول ومكتب التصميم: من الرسومات إلى تقدير التكلفة وخطة التنفيذ وحسابات المشروع.',
+ b_rd_h:'قراءة الرسومات', b_rd_p:'يتعرّف على المساقط والقطاعات والواجهات وجداول الأعمدة والقواعد، بالعربية أو الإنجليزية، ويعرض ما قرأه لتراجعه قبل الحساب.',
+ b_rd_1:'ملفات DXF أو DWG من AutoCAD أو Revit', b_rd_2:'كل عنصر يعرف كيف يلتقي بما يجاوره، فلا يُحسب شيء مرتين', b_rd_3:'تنبيهات الرسم قبل الحساب',
+ b_q_h:'المعلومات الناقصة سؤالًا سؤالًا', b_q_p:'لا يخمّن البرنامج أي كمية: ما ليس في الرسم يسأل عنه سؤالًا واحدًا في كل مرة، ويُظهر موضعه على الرسم.',
+ b_q_1:'التسليح من التصميم، والوصلات والجنشات حسب الكود المصري ECP 203 و ACI 318', b_q_2:'الإجابات محفوظة، وتعدّلها متى شئت',
+ b_res_h:'النتيجة على العمارة', b_res_p:'تكلفة كل دور على شكل العمارة نفسها، واضغط على أي دور لترى تفصيله.',
+ b_res_1:'التكلفة المباشرة، وسعر المتر، ومدة التنفيذ', b_res_2:'درجة الثقة في الحصر', b_res_3:'ملف Excel للكميات والأسعار، وملف XER لبرنامج Primavera P6',
+ b_rep_h:'التقرير ودراسة الجدوى', b_rep_p:'تقرير كامل في مجموعات: الملخص، والحصر والكميات، والتكلفة والتوريد، والبرنامج الزمني، والجدوى.',
+ b_rep_1:'المبيعات وصافي الربح وسعر التعادل', b_rep_2:'المعالم الرئيسية (Milestones) للمشروع', b_rep_3:'طباعة أو حفظ PDF',
+ b_acc_h:'حسابات المشروع', b_acc_p:'دفتر لكل مشروع: الخزينة والبنك، والموردون والمقاولون، والمشترون، والشركاء، بإيصالاتها.',
+ b_acc_1:'الفواتير الواردة ومتابعتها', b_acc_2:'تقارير الحسابات بصيغ Excel و HTML و PDF',
+ b_samples:'الصور من مشروع نموذجي ورسم تجريبي وبأسماء افتراضية.',
+ b_t_s:'يعمل البرنامج على جهازكم، ولا يرفع الرسومات أو المشروعات أو الحسابات إلى أي مكان.',
+ b_t1b:'الرسومات الأصلية كما هي', b_t1:'يقرأ البرنامج نسخة داخل مجلد المشروع، ولا يغيّر ملفاتكم.',
+ b_t3b:'أسعاركم أنتم', b_t3:'لكل مشروع قائمة أسعار خاصة به تعدّلونها حسب موقعه.',
+ b_s1:'حمّل الملف وفكّ ضغطه في مجلد على الجهاز، واترك المجلد libs بجوار البرنامج كما هو.',
+ b_s2:'شغّل HT Build-Plan.exe.‏ البرنامج غير موقّع رقميًا، لذا قد يظهر تحذير Windows: اختر More info ثم Run anyway.‏',
+ b_s3:'أنشئ حسابًا وأكّد بريدك الإلكتروني. بعد الموافقة على طلبك يصلك بريد بمدة الترخيص، ويكتمل التفعيل ويعمل البرنامج دون إنترنت. مدة الترخيص 6 أشهر، وتُجدَّد مجانًا عند الطلب.',
+ b_legal:'<bdi>AutoCAD</bdi> و <bdi>Revit</bdi> علامتان تجاريتان لشركة <bdi>Autodesk</bdi>، و <bdi>Primavera</bdi> و <bdi>P6</bdi> علامتان تجاريتان لشركة <bdi>Oracle</bdi>، و <bdi>HT Build-Plan</bdi> برنامج مستقل لا صلة له بهما.'
 },
 en: {
  free:'Completely free · Non-profit', h1:'Review Primavera P6 schedules from the XER file, without opening P6',
@@ -197,7 +300,30 @@ en: {
  s3b:'Activate', s3:'Create an account and confirm your e-mail. Once your request is approved, activation completes and the program works offline. The licence lasts 6 months and is renewed free on request.',
  gar:'دليل المستخدم بالعربية', gen:'User Guide in English',
  k_h:'Contact', k_s:'Download directly from this page. For activation requests, questions and feedback, e-mail is the only way to reach us.', mail:'E-mail', lang:'العربية',
- legal:'Primavera and P6 are trademarks of Oracle. HT XER-Audit is an independent program, not connected with Oracle.'
+ legal:'Primavera and P6 are trademarks of Oracle. HT XER-Audit is an independent program, not connected with Oracle.',
+ app_xer:'Primavera P6 schedule review', app_bp:'Real-estate estimating and planning',
+ b_h1:'From the building drawings to the quantities, the cost and the programme',
+ b_lead:'Add the AutoCAD or Revit drawings of a residential building and the program reads them as an engineer does: foundations, frame, masonry and finishes. Then it gives the BOQ, the cost, the materials, the feasibility study and the programme as an XER file for Primavera P6.',
+ b_dlnote:'Zip file, about 148 MB. Windows 10 or 11 (64-bit).',
+ b_fh:'The whole building in one program', b_fs:'For developers, contractors and design offices: from the drawings to the cost estimate, the execution plan and the project accounts.',
+ b_rd_h:'Reading the drawings', b_rd_p:'It finds the plans, sections, elevations and the column and footing schedules, in Arabic or English, and shows what it read for you to check before the calculation.',
+ b_rd_1:'DXF or DWG files from AutoCAD or Revit', b_rd_2:'Every element knows how it meets the next one, so nothing is counted twice', b_rd_3:'Drawing warnings before the calculation',
+ b_q_h:'Missing information, one question at a time', b_q_p:'The program never guesses a quantity: what the drawing does not say, it asks one question at a time and shows where on the drawing.',
+ b_q_1:'Reinforcement from the design; laps and hooks by ECP 203 and ACI 318', b_q_2:'Answers are saved and can be changed at any time',
+ b_res_h:'The result on the building', b_res_p:'The cost of every floor on the building itself; click a floor to see its breakdown.',
+ b_res_1:'Direct cost, cost per m² and duration', b_res_2:'A confidence score for the take-off', b_res_3:'An Excel file of quantities and prices, and an XER file for Primavera P6',
+ b_rep_h:'Report and feasibility', b_rep_p:'A full report in groups: summary, take-off and quantities, cost and procurement, programme and feasibility.',
+ b_rep_1:'Sales, net profit and break-even price', b_rep_2:'The project Milestones', b_rep_3:'Print or save as PDF',
+ b_acc_h:'Project accounts', b_acc_p:'A book for every project: cash and bank, suppliers and subcontractors, buyers and partners, with their receipts.',
+ b_acc_1:'Incoming invoices and their follow-up', b_acc_2:'Account reports as Excel, HTML and PDF',
+ b_samples:'Pictures are from a sample project and a test drawing, with invented names.',
+ b_t_s:'The program runs on your PC and uploads no drawings, projects or accounts anywhere.',
+ b_t1b:'Your drawings stay as they are', b_t1:'The program reads a copy inside the project folder and never changes your files.',
+ b_t3b:'Your own prices', b_t3:'Every project has its own price list, set for its location.',
+ b_s1:'Download the file and extract it to a folder. Keep the libs folder beside the program as it is.',
+ b_s2:'Run HT Build-Plan.exe. The program is not digitally signed, so Windows may warn you: choose More info, then Run anyway.',
+ b_s3:'Create an account and confirm your e-mail. Once your request is approved you get an e-mail with the licence period, activation completes and the program works offline. The licence lasts 6 months and is renewed free on request.',
+ b_legal:'AutoCAD and Revit are trademarks of Autodesk; Primavera and P6 are trademarks of Oracle. HT Build-Plan is an independent program, not connected with them.'
 }};
 
 /* on GitHub Pages the links build themselves from the address: <account>.github.io/<repo>/ */
@@ -211,6 +337,28 @@ const asset = n => repo ? `https://github.com/${repo}/releases/latest/download/$
 ['dl', 'dl2'].forEach(id => document.getElementById(id).href = asset('HT-XER-Audit.zip'));
 document.getElementById('gar').href = asset('HT-XER-Audit-User-Guide-AR.pdf');
 document.getElementById('gen').href = asset('HT-XER-Audit-User-Guide-EN.pdf');
+/* HT Build-Plan has its own release list (a release here would become «latest» and break the XER-Audit buttons) */
+const BP_REPO = 'HTxeraudit/HT-Build-Plan';
+['bdl', 'bdl2'].forEach(id => document.getElementById(id).href = `https://github.com/${BP_REPO}/releases/latest/download/HT-Build-Plan.zip`);
+
+/* which program is shown: #build-plan opens HT Build-Plan, anything else HT XER-Audit */
+let APP = 'xer';
+function setApp(a, scroll) {
+  APP = a === 'bp' ? 'bp' : 'xer';
+  document.getElementById('p-xer').hidden = APP !== 'xer';
+  document.getElementById('p-bp').hidden = APP !== 'bp';
+  document.getElementById('tab-xer').setAttribute('aria-selected', APP === 'xer');
+  document.getElementById('tab-bp').setAttribute('aria-selected', APP === 'bp');
+  document.getElementById('logoName').textContent = APP === 'bp' ? 'Build-Plan' : 'XER-Audit';
+  document.title = APP === 'bp' ? 'HT Build-Plan' : 'HT XER-Audit';
+  const t = T[document.documentElement.lang] || T.ar;
+  document.getElementById('legal').innerHTML = APP === 'bp' ? t.b_legal : t.legal;
+  if (scroll) window.scrollTo({top: 0});
+}
+document.querySelectorAll('.app').forEach(b => b.addEventListener('click', e => {
+  e.preventDefault(); history.replaceState(null, '', b.getAttribute('href')); setApp(b.dataset.app, true);
+}));
+window.addEventListener('hashchange', () => { if (['#build-plan', '#xer-audit'].includes(location.hash)) setApp(location.hash === '#build-plan' ? 'bp' : 'xer'); });
 
 const v = document.getElementById('video');
 if (CONFIG.YOUTUBE) v.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(CONFIG.YOUTUBE)}" title="HT XER-Audit" allowfullscreen loading="lazy"></iframe>`;
@@ -219,7 +367,8 @@ else v.innerHTML = '<video controls preload="none" poster="assets/poster.jpg" sr
 function setLang(l) {
   const t = T[l], root = document.documentElement;
   root.lang = l; root.dir = l === 'ar' ? 'rtl' : 'ltr'; document.body.classList.toggle('en', l === 'en');
-  document.querySelectorAll('[data-t]').forEach(e => { const k = e.dataset.t; if (k === 'legal') e.innerHTML = t[k]; else e.textContent = t[k]; });
+  document.querySelectorAll('[data-t]').forEach(e => { e.textContent = t[e.dataset.t]; });
+  document.getElementById('legal').innerHTML = APP === 'bp' ? t.b_legal : t.legal;
   document.querySelectorAll('[data-alt]').forEach(e => e.alt = t[e.dataset.alt]);
   document.getElementById('lang').textContent = t.lang;
   const c = document.getElementById('contact'); c.replaceChildren();
@@ -230,6 +379,7 @@ function setLang(l) {
 let start = new URLSearchParams(location.search).get('lang');
 if (!T[start]) { try { start = localStorage.getItem('ht-lang'); } catch (e) {} }
 if (!T[start]) start = 'ar';
+setApp(location.hash === '#build-plan' || new URLSearchParams(location.search).get('app') === 'bp' ? 'bp' : 'xer');
 setLang(start);
 document.getElementById('lang').onclick = () => setLang(document.documentElement.lang === 'ar' ? 'en' : 'ar');
 </script>
