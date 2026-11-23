@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HT Speech">
+  <title>HT Speech – الكتابة الفورية للكلام</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark">
+  <header class="bar">
+    <div class="status" id="status" role="status" aria-live="polite">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">متوقف</span>
+    </div>
+    <div class="bar-tools">
+      <button class="icon-btn" id="fontDown" aria-label="تصغير الخط">أ−</button>
+      <button class="icon-btn" id="fontUp" aria-label="تكبير الخط">أ+</button>
+      <button class="icon-btn" id="openSettings" aria-label="الإعدادات">⚙︎</button>
+    </div>
+  </header>
+
+  <div class="level" aria-hidden="true"><div class="level-fill" id="levelFill"></div></div>
+
+  <main class="stage" id="stage">
+    <div class="cue" id="cue" aria-live="assertive">يتحدث أحدٌ الآن</div>
+    <div class="transcript" id="transcript" aria-live="polite" aria-label="النص المكتوب">
+      <p class="placeholder" id="placeholder">اضغط «بدء الاستماع» وسيظهر الكلام مكتوبًا هنا بخط كبير.</p>
+    </div>
+    <textarea class="editor" id="editor" hidden aria-label="تحرير النص" dir="auto"></textarea>
+  </main>
+
+  <div class="toast" id="toast" role="alert" hidden></div>
+
+  <footer class="controls" id="controls">
+    <div class="row" id="rowMain">
+      <button class="btn primary" id="btnStart">بدء الاستماع</button>
+      <button class="btn" id="btnPause" hidden>إيقاف مؤقت</button>
+      <button class="btn primary" id="btnResume" hidden>استئناف</button>
+      <button class="btn danger" id="btnEnd" hidden>إنهاء الجلسة</button>
+    </div>
+    <div class="row small" id="rowText" hidden>
+      <button class="btn ghost" id="btnEdit">تحرير</button>
+      <button class="btn ghost" id="btnCopy">نسخ</button>
+      <button class="btn ghost" id="btnSave">حفظ TXT</button>
+      <button class="btn ghost" id="btnShare">مشاركة</button>
+      <button class="btn ghost" id="btnClear">مسح</button>
+    </div>
+  </footer>
+
+  <dialog id="settings" class="sheet">
+    <form method="dialog">
+      <h2>الإعدادات</h2>
+
+      <label class="field">لغة الكلام
+        <select id="lang">
+          <option value="ar-EG">العربية – مصر</option>
+          <option value="ar-SA">العربية – السعودية</option>
+          <option value="ar-AE">العربية – الإمارات</option>
+          <option value="en-US">English – US</option>
+          <option value="en-GB">English – UK</option>
+        </select>
+        <small>المحرك يستمع بلغة واحدة في كل مرة. الكلمات الإنجليزية داخل الكلام العربي قد تُكتب بحروف عربية.</small>
+      </label>
+
+      <label class="field">حجم الخط <span id="fontVal"></span>
+        <input type="range" id="fontSize" min="20" max="72" step="2">
+      </label>
+
+      <label class="field">الألوان
+        <select id="theme">
+          <option value="dark">داكن</option>
+          <option value="light">فاتح</option>
+          <option value="contrast">أصفر على أسود (تباين عالٍ)</option>
+        </select>
+      </label>
+
+      <label class="check"><input type="checkbox" id="optMeter"> إظهار مستوى الصوت والتنبيه عند بدء الكلام</label>
+      <label class="check"><input type="checkbox" id="optWake"> إبقاء الشاشة مضاءة أثناء الاستماع</label>
+      <label class="check"><input type="checkbox" id="optTimes"> إظهار وقت كل فقرة</label>
+
+      <div class="about">
+        <b>الخصوصية</b>
+        <p>يستخدم التطبيق خدمة التعرف على الكلام المدمجة في المتصفح. في سفاري على آيفون هي خدمة الإملاء من Apple، وقد يُرسَل الصوت إلى خوادم Apple للتعرف عليه. لا يحفظ التطبيق أي تسجيل صوتي، ويبقى النص على جهازك فقط.</p>
+        <b>حدود الاستخدام</b>
+        <p>الدقة أفضل كلما كان المتحدث أقرب إلى الهاتف وكان المكان هادئًا. الكلام البعيد جدًا أو المختلط بضوضاء عالية قد لا يُفهم. المحرك لا يوفّر نسبة ثقة موثوقة، لذلك لا يعرض التطبيق أي نسبة.</p>
+      </div>
+
+      <button class="btn primary wide" value="close">تم</button>
+    </form>
+  </dialog>
+
+  <dialog id="privacy" class="sheet">
+    <form method="dialog">
+      <h2>قبل البدء</h2>
+      <p>سيستمع التطبيق إلى الميكروفون فقط بعد ضغطك «بدء الاستماع»، وتظهر نقطة حمراء طوال مدة الاستماع.</p>
+      <p>يتم التعرف على الكلام عبر خدمة الإملاء من Apple، وقد يُرسَل الصوت إلى خوادم Apple لهذا الغرض. لا يُحفظ أي تسجيل صوتي.</p>
+      <button class="btn primary wide" value="ok">موافق، ابدأ</button>
+      <button class="btn ghost wide" value="cancel">إلغاء</button>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

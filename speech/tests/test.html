@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><title>اختبارات النواة</title>
+<style>body{font-family:Segoe UI,Tahoma,sans-serif;padding:16px;font-size:16px} .ok{color:#15803d} .bad{color:#b91c1c;font-weight:700} pre{white-space:pre-wrap}</style>
+</head>
+<body>
+<h1>اختبارات دمج النص</h1>
+<div id="sum"></div>
+<ol id="out"></ol>
+<script type="module">
+import { Transcript, mergeSequence, splitInstance } from '../js/transcript.js';
+const out = document.getElementById('out');
+let pass = 0, fail = 0;
+function eq(name, got, want) {
+  const ok = JSON.stringify(got) === JSON.stringify(want);
+  ok ? pass++ : fail++;
+  const li = document.createElement('li');
+  li.className = ok ? 'ok' : 'bad';
+  li.innerHTML = (ok ? 'نجح: ' : 'فشل: ') + name + (ok ? '' : `<pre>المتوقع: ${JSON.stringify(want)}\nالناتج:  ${JSON.stringify(got)}</pre>`);
+  out.appendChild(li);
+}
+const R = (text, isFinal = false) => ({ text, isFinal });
+
+// 1) نص مختلط عربي وإنجليزي يبقى حرفيًا كما هو
+eq('الكلام المختلط يبقى حرفيًا', mergeSequence(['أنا عندي meeting بكرة الساعة ten']), 'أنا عندي meeting بكرة الساعة ten');
+
+// 2) سفاري يرسل النص تراكميًا داخل جولة واحدة
+{
+  const t = new Transcript();
+  t.update([R('أنا')]);
+  t.update([R('أنا عندي')]);
+  t.update([R('أنا عندي meeting')]);
+  t.update([R('أنا عندي meeting بكرة', true)]);
+  eq('التراكمي: الثابت صحيح', t.current, { finalText: 'أنا عندي meeting بكرة', interimText: '' });
+  t.commit();
+  eq('التراكمي: فقرة واحدة بلا تكرار', t.toPlainText(), 'أنا عندي meeting بكرة');
+}
+
+// 3) نتائج منفصلة (أسلوب كروم)
+{
+  const t = new Transcript();
+  t.update([R('ازيك يا', true), R(' عامل')]);
+  eq('المنفصل: ثابت ومؤقت', t.current, { finalText: 'ازيك يا', interimText: 'عامل' });
+  t.update([R('ازيك يا', true), R(' عامل ايه', true)]);
+  t.commit();
+  eq('المنفصل: الدمج', t.toPlainText(), 'ازيك يا عامل ايه');
+}
+
+// 4) المؤقت يحتوي الثابت (خلل معروف في بعض النسخ)
+eq('المؤقت المكرر للثابت يُحذف منه', splitInstance([R('hello', true), R('hello there')]), { finalText: 'hello', interimText: 'there' });
+
+// 5) المحرك لم يعلّم النتيجة نهائية أبدًا ثم توقف: لا يضيع الكلام
+{
+  const t = new Transcript();
+  t.update([R('الكلام ده مش هيضيع')]);
+  t.commit();
+  eq('المؤقت يُثبَّت عند نهاية الجولة', t.toPlainText(), 'الكلام ده مش هيضيع');
+}
+
+// 6) إعادة التشغيل أعادت إرسال نفس الجملة
+{
+  const t = new Transcript();
+  t.update([R('السلام عليكم', true)]); t.commit();
+  t.update([R('السلام عليكم', true)]); t.commit();
+  t.update([R('عليكم', true)]); t.commit();
+  eq('لا تكرار بعد إعادة التشغيل', t.segments.length, 1);
+}
+
+// 7) الصمت والضوضاء: نتائج فارغة لا تنتج نصًا
+{
+  const t = new Transcript();
+  t.update([R('   '), R('')]); t.commit();
+  t.commit();
+  eq('الصمت لا يكتب شيئًا', t.toPlainText(), '');
+}
+
+// 8) جلسة طويلة: 3000 جولة (تعادل ساعات من الكلام)
+{
+  const t = new Transcript();
+  const t0 = performance.now();
+  for (let i = 0; i < 3000; i++) {
+    t.update([R('جملة')]); t.update([R('جملة رقم ' + i, true)]); t.commit();
+  }
+  const ms = Math.round(performance.now() - t0);
+  eq('الجلسة الطويلة: كل الفقرات محفوظة', t.segments.length, 3000);
+  eq('الجلسة الطويلة: آخر فقرة صحيحة', t.segments[2999].text, 'جملة رقم 2999');
+  eq('الجلسة الطويلة: الزمن أقل من ثانية (' + ms + ' ms)', ms < 1000, true);
+}
+
+// 9) التعديل اليدوي يستبدل النص
+{
+  const t = new Transcript();
+  t.update([R('نص قديم', true)]); t.commit();
+  t.replaceAll('سطر أول\n\nسطر تاني');
+  eq('التعديل اليدوي', t.toPlainText(), 'سطر أول\nسطر تاني');
+}
+
+// 10) جملة إنجليزية كاملة
+eq('الإنجليزي كما هو', mergeSequence(['The meeting is', 'The meeting is at ten']), 'The meeting is at ten');
+
+document.getElementById('sum').innerHTML = `<b>${fail ? 'يوجد فشل' : 'كل الاختبارات نجحت'}</b> — نجح ${pass}، فشل ${fail}`;
+window.__result = { pass, fail };
+</script>
+</body>
+</html>
