@@ -98,6 +98,89 @@ eq('المؤقت المكرر للثابت يُحذف منه', splitInstance([R(
 // 10) جملة إنجليزية كاملة
 eq('الإنجليزي كما هو', mergeSequence(['The meeting is', 'The meeting is at ten']), 'The meeting is at ten');
 
+// ================= Whisper: التقطيع ومنع الاختلاق =================
+const { Segmenter } = await import('../js/vad.js');
+const { judge, UNCLEAR } = await import('../js/filter.js');
+const { encodeWav, downsample } = await import('../js/wav.js');
+
+const SR = 16000;
+let seed = 7;
+const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647 - 0.5; };
+// «كلام» صناعي: ضوضاء متقطعة بإيقاع المقاطع (4 مقاطع في الثانية) بمستوى amp
+function speech(sec, amp, floorAmp = 0.0006) {
+  const n = Math.round(sec * SR), out = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const syl = Math.sin(Math.PI * ((i / SR) * 4 % 1));          // غلاف مقطع
+    out[i] = rnd() * 2 * (amp * syl * syl + floorAmp);
+  }
+  return out;
+}
+function quiet(sec, amp = 0.0006) { const n = Math.round(sec * SR), o = new Float32Array(n); for (let i = 0; i < n; i++) o[i] = rnd() * 2 * amp; return o; }
+function runVad(parts, opts = {}) {
+  const s = new Segmenter({ sampleRate: SR, ...opts });
+  const segs = [];
+  for (const p of parts) for (let i = 0; i < p.length; i += 2048) {
+    for (const e of s.push(p.slice(i, i + 2048))) if (e.type === 'end' && e.audio) segs.push(e.audio.length / SR);
+  }
+  for (const e of s.flush()) if (e.type === 'end' && e.audio) segs.push(e.audio.length / SR);
+  return segs;
+}
+const FAR = { ratio: 2, absMin: 0.0022 };
+
+eq('الصمت 20 ثانية: لا يُرسل أي مقطع', runVad([quiet(20)]).length, 0);
+eq('بداية صفرية للميكروفون ثم ضوضاء مكان عالية مع «أقصى»: لا مقاطع وهمية', runVad([new Float32Array(SR), quiet(15, 0.006)], FAR).length, 0);
+eq('الهدوء بعد الكلام أعلى من البداية (تعلية تلقائية): الجمل تنتهي ولا تلتصق', runVad([new Float32Array(SR), quiet(1, 0.002), speech(1.5, 0.15, 0.007), quiet(2, 0.007), speech(1.5, 0.15, 0.007), quiet(3, 0.007)], FAR).length, 2);
+eq('مروحة تبدأ أثناء الكلام: المقطع ينتهي ولا يستمر للأبد', runVad([quiet(1), speech(1.5, 0.1), quiet(20, 0.03)]).length <= 2, true);
+eq('بداية صفرية ثم جملة: تُلتقط وتنتهي', runVad([new Float32Array(SR), quiet(1, 0.006), speech(1.5, 0.1, 0.006), quiet(3, 0.006)], FAR).length, 1);
+eq('ضوضاء ثابتة (مروحة) 20 ثانية: لا يُرسل أي مقطع', runVad([quiet(1, 0.0006), quiet(20, 0.02).map((v, i) => v + 0.0)]).length <= 1, true);
+eq('ضوضاء ثابتة من البداية: لا مقاطع', runVad([quiet(20, 0.02)]).length, 0);
+{
+  const segs = runVad([quiet(1), speech(1.5, 0.1), quiet(3)]);
+  eq('جملة واحدة واضحة: مقطع واحد', segs.length, 1);
+  eq('الجملة كاملة مع هامش قبلها وبعدها (' + (segs[0] || 0).toFixed(2) + ' ث)', segs[0] >= 1.5 && segs[0] <= 2.6, true);
+}
+eq('جملتان قصيرتان بينهما توقف قصير: تُدمجان في طلب واحد', runVad([quiet(1), speech(1.2, 0.1), quiet(0.8), speech(1.5, 0.1), quiet(3)]).length, 1);
+{
+  const parts = [quiet(1)];
+  for (let k = 0; k < 8; k++) { parts.push(speech(4, 0.1)); parts.push(quiet(0.3)); }
+  parts.push(quiet(3));
+  const segs = runVad(parts);
+  const total = segs.reduce((a, b) => a + b, 0);
+  eq('كلام متصل 34 ثانية: يُقطع عند التوقفات (' + segs.length + ' مقاطع)', segs.length >= 2 && segs.length <= 4, true);
+  eq('لا يضيع شيء من الكلام المتصل (' + total.toFixed(1) + ' ث من 34.4)', total >= 33.5, true);
+}
+eq('كلام بعيد واطي جدًا بلا تعلية: لا يُلتقط', runVad([quiet(1, 0.0003), speech(2, 0.0012, 0.0003), quiet(3, 0.0003)]).length, 0);
+eq('نفس الكلام البعيد مع وضع «أقصى»: يُلتقط', runVad([quiet(1, 0.0003).map((v) => v * 14), speech(2, 0.0012, 0.0003).map((v) => v * 14), quiet(3, 0.0003).map((v) => v * 14)], FAR).length, 1);
+{
+  const parts = [quiet(1)];
+  for (let k = 0; k < 600; k++) { parts.push(speech(3, 0.1)); parts.push(quiet(1.6)); }
+  const t0 = performance.now();
+  const segs = runVad(parts);
+  eq('جلسة طويلة 46 دقيقة: 600 جملة = 600 مقطع', segs.length, 600);
+  eq('زمن معالجة الجلسة الطويلة (' + Math.round(performance.now() - t0) + ' ms) أقل من 10 ثوانٍ', performance.now() - t0 < 10000, true);
+}
+
+const S = (text, o = {}) => ({ text, no_speech_prob: 0.01, avg_logprob: -0.2, compression_ratio: 1.3, ...o });
+eq('المختلط يبقى حرفيًا', judge({ segments: [S(' أنا عندي meeting بكرة الساعة ten')] }).text, 'أنا عندي meeting بكرة الساعة ten');
+eq('العامية لا تتغير', judge({ segments: [S('ازيك يا باشا عامل ايه النهارده')] }).text, 'ازيك يا باشا عامل ايه النهارده');
+eq('«اشتركوا في القناة» تُحذف', judge({ segments: [S('اشتركوا في القناة')] }).text, '');
+eq('«ترجمة نانسي قنقر» تُحذف', judge({ segments: [S('ترجمة نانسي قنقر')] }).text, '');
+eq('«Thank you for watching» تُحذف', judge({ segments: [S('Thank you for watching!')] }).text, '');
+eq('مقطع صمت باحتمال عالٍ يُحذف', judge({ segments: [S('السلام عليكم', { no_speech_prob: 0.9, avg_logprob: -1.2 })] }).text, '');
+eq('كلام غير واثق = [غير واضح]', judge({ segments: [S('كلام مش مفهوم', { avg_logprob: -1.4 })] }).text, UNCLEAR);
+eq('تكرار حلقي = [غير واضح]', judge({ segments: [S('لا لا لا لا لا لا لا لا لا لا', { compression_ratio: 3 })] }).text, UNCLEAR);
+eq('واضح + غير واضح + واضح', judge({ segments: [S('أنا رايح'), S('xx', { avg_logprob: -1.5 }), S('الشغل بكرة')] }).text, 'أنا رايح [غير واضح] الشغل بكرة');
+eq('تسرّب جملة التوجيه يُحذف', judge({ segments: [S('وبعدين هبعتلك الـ report على الـ email')] }, { prompt: 'أنا عندي meeting بكرة الساعة ten، وبعدين هبعتلك الـ report على الـ email.' }).text, '');
+eq('«Thank you» الحقيقية تبقى', judge({ segments: [S('Thank you')] }).text, 'Thank you');
+eq('«Thank you» مع شك في الصمت تُحذف', judge({ segments: [S('Thank you', { no_speech_prob: 0.5 })] }).text, '');
+
+{
+  const w = encodeWav(downsample(speech(1, 0.1).map((v) => v), 16000, 16000));
+  eq('ملف WAV: الحجم صحيح لثانية واحدة', w.size, 44 + 16000 * 2);
+  const d = downsample(new Float32Array(48000).fill(0.5), 48000, 16000);
+  eq('تحويل 48 kHz إلى 16 kHz', [d.length, Math.abs(d[100] - 0.5) < 1e-6], [16000, true]);
+}
+
 document.getElementById('sum').innerHTML = `<b>${fail ? 'يوجد فشل' : 'كل الاختبارات نجحت'}</b> — نجح ${pass}، فشل ${fail}`;
 window.__result = { pass, fail };
 </script>

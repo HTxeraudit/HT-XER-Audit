@@ -59,7 +59,37 @@
     <form method="dialog">
       <h2>الإعدادات</h2>
 
-      <label class="field">لغة الكلام
+      <label class="field">محرك التعرف على الكلام
+        <select id="engine">
+          <option value="whisper">Whisper – الأدق</option>
+          <option value="apple">Apple – كلمة بكلمة</option>
+        </select>
+        <small>Whisper أدق للعربي المصري والإنجليزي في الجملة نفسها، ومجاني بحدود يومية. Apple يكتب كلمة بكلمة بلغة واحدة.</small>
+      </label>
+
+      <div class="group" id="whisperBox">
+        <label class="field">مفتاح Groq
+          <input type="password" id="groqKey" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr" placeholder="gsk_...">
+          <small>يُحفظ على هذا الجهاز فقط. للحصول على مفتاح مجاني: سجّل في console.groq.com ثم افتح صفحة API Keys.</small>
+        </label>
+        <div class="row">
+          <button type="button" class="btn ghost" id="saveKey">حفظ المفتاح وفحصه</button>
+          <button type="button" class="btn ghost" id="clearKey">حذف المفتاح</button>
+        </div>
+        <p class="key-status" id="keyStatus"></p>
+
+        <label class="field">لغة الكلام
+          <select id="wlang">
+            <option value="">تلقائي – عربي وإنجليزي في الجملة نفسها</option>
+            <option value="ar">عربي فقط</option>
+            <option value="en">English only</option>
+          </select>
+        </label>
+
+        <small>يعمل التطبيق تلقائيًا على أعلى تعلية للصوت لالتقاط الكلام الواطي والبعيد، مع ضاغط يمنع تشوّه الكلام القريب. الدقة مع الكلام البعيد أقل من القريب.</small>
+      </div>
+
+      <label class="field" id="appleLangBox">لغة الكلام (محرك Apple)
         <select id="lang">
           <option value="ar-EG">العربية – مصر</option>
           <option value="ar-SA">العربية – السعودية</option>
@@ -88,9 +118,10 @@
 
       <div class="about">
         <b>الخصوصية</b>
-        <p>يستخدم التطبيق خدمة التعرف على الكلام المدمجة في المتصفح. في سفاري على آيفون هي خدمة الإملاء من Apple، وقد يُرسَل الصوت إلى خوادم Apple للتعرف عليه. لا يحفظ التطبيق أي تسجيل صوتي، ويبقى النص على جهازك فقط.</p>
+        <p>مع محرك Whisper تُرسَل مقاطع الكلام إلى خدمة Groq عبر الإنترنت لتحويلها إلى نص. مع محرك Apple قد يُرسَل الصوت إلى خوادم Apple. لا يحفظ التطبيق أي تسجيل صوتي، ويبقى النص على جهازك فقط.</p>
         <b>حدود الاستخدام</b>
-        <p>الدقة أفضل كلما كان المتحدث أقرب إلى الهاتف وكان المكان هادئًا. الكلام البعيد جدًا أو المختلط بضوضاء عالية قد لا يُفهم. المحرك لا يوفّر نسبة ثقة موثوقة، لذلك لا يعرض التطبيق أي نسبة.</p>
+        <p>الدقة أفضل كلما كان المتحدث أقرب إلى الهاتف وكان المكان هادئًا. الكلام البعيد أو من غرفة مجاورة يُكتب إن كان مسموعًا، لكن بدقة أقل. لا يميّز التطبيق بين المتحدثين. ما لا يفهمه المحرك يُكتب «[غير واضح]» بدلًا من التخمين. لا يعرض التطبيق نسبة ثقة.</p>
+        <p>الخطة المجانية من Groq محدودة بنحو ثماني ساعات كلام يوميًا، وعشرين جملة في الدقيقة.</p>
       </div>
 
       <button class="btn primary wide" value="close">تم</button>
@@ -101,7 +132,8 @@
     <form method="dialog">
       <h2>قبل البدء</h2>
       <p>سيستمع التطبيق إلى الميكروفون فقط بعد ضغطك «بدء الاستماع»، وتظهر نقطة حمراء طوال مدة الاستماع.</p>
-      <p>يتم التعرف على الكلام عبر خدمة الإملاء من Apple، وقد يُرسَل الصوت إلى خوادم Apple لهذا الغرض. لا يُحفظ أي تسجيل صوتي.</p>
+      <p id="privacyEngineText"></p>
+      <p>لا يُحفظ أي تسجيل صوتي.</p>
       <button class="btn primary wide" value="ok">موافق، ابدأ</button>
       <button class="btn ghost wide" value="cancel">إلغاء</button>
     </form>

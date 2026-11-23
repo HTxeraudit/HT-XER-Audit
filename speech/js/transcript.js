@@ -70,6 +70,20 @@ export class Transcript {
     return seg;
   }
 
+  /** إضافة فقرة مكتملة مباشرة (محرك Whisper يعيد كل جملة كاملة). */
+  addSegment(text, at) {
+    const t = clean(text);
+    if (!t) return null;
+    const seg = { text: t, at: at || new Date() };
+    this.segments.push(seg);
+    return seg;
+  }
+
+  /** آخر ما كُتب، لتوجيه المحرك بسياق الكلام. */
+  tail(chars = 120) {
+    return this.segments.map((s) => s.text).join(' ').slice(-chars);
+  }
+
   /** استبدال النص كله بعد تعديل المستخدم. */
   replaceAll(text) {
     this.current = { finalText: '', interimText: '' };
