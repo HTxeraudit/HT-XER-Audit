@@ -4,17 +4,19 @@
 import { Segmenter } from './vad.js';
 import { downsample, encodeWav } from './wav.js';
 import { transcribe, STYLE_PROMPT } from './groq.js';
-import { judge } from './filter.js';
+import { judge, isForeignResponse } from './filter.js';
 
 // مستويات تعلية الصوت. «far» للكلام البعيد (غرفة مجاورة): تعلية أقصى وحساسية أعلى لبداية الكلام.
 export const BOOST = {
   off:    { gain: 1,  ratio: 3,   absMin: 0.004 },
   medium: { gain: 3,  ratio: 3,   absMin: 0.004 },
   high:   { gain: 6,  ratio: 2.5, absMin: 0.003 },
-  far:    { gain: 14, ratio: 2,   absMin: 0.0022 },
+  far:    { gain: 14, ratio: 1.8, absMin: 0.0015 },
 };
 
-export const MIC_CONSTRAINTS = { echoCancellation: false, noiseSuppression: true, autoGainControl: true, channelCount: 1 };
+// تقليل الضوضاء المدمج في آيفون مصمم للكلام القريب من الهاتف، ويمسح الأصوات البعيدة على أنها ضوضاء؛
+// لذلك نقفله ونعتمد على فلاترنا (حذف الزنّة والصفير) وعلى منع الاختلاق بعد التفريغ.
+export const MIC_CONSTRAINTS = { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 };
 
 const MAX_PER_MIN = 18;     // حد الخطة المجانية 20 طلبًا في الدقيقة؛ نترك هامشًا
 const CONCURRENCY = 2;
@@ -150,7 +152,12 @@ export class WhisperEngine extends EventTarget {
     const ctxText = (this.getContextText() || '').slice(-120);
     const prompt = (STYLE_PROMPT + ' ' + ctxText).trim();
     try {
-      const resp = await transcribe(job.wav, { key: this.key, language: this.language, prompt });
+      let resp = await transcribe(job.wav, { key: this.key, language: this.language, prompt });
+      // في الوضع التلقائي: إن ظنّ المحرك اللغة روسية أو غيرها، نعيد المقطع مرة واحدة على أنه عربي،
+      // حتى لا يضيع كلام حقيقي تُرجم خطأً؛ وإن كان ضوضاء فسيحذفه الفلتر بعدها.
+      if (!this.language && isForeignResponse(resp)) {
+        resp = await transcribe(job.wav, { key: this.key, language: 'ar', prompt });
+      }
       // فحص التسرّب على جملة التوجيه الثابتة فقط؛ تكرار المتحدث لكلام قاله قبل ذلك كلام حقيقي لا يُحذف.
       const { text } = judge(resp, { prompt: STYLE_PROMPT });
       this._emit('final', { seq: job.seq, text });

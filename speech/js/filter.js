@@ -9,7 +9,29 @@ const KNOWN = [
   'شكرا للمشاهدة', 'شكرا على المشاهدة', 'شكرا لكم على المشاهدة', 'شكرا لحسن استماعكم', 'تفريغ وتدقيق', 'موسيقى',
   'thank you for watching', 'thanks for watching', 'please subscribe', 'like and subscribe', 'subtitles by',
   'amara org', 'transcribed by', 'translated by',
+  // عبارات وهمية بلغات أخرى يكتبها Whisper في الصمت
+  'продолжение следует', 'субтитры', 'редактор субтитров', 'спасибо за просмотр',
+  'ご視聴ありがとうございました', '시청해주셔서 감사합니다', '字幕', '请不吝点赞',
+  'untertitel', 'untertitelung', 'sous titrage', 'sous titres', 'subtitulos realizados', 'gracias por ver',
 ];
+
+/**
+ * المستخدم يتكلم عربي وإنجليزي فقط؛ نص أغلب حروفه من أبجدية أخرى (روسي، صيني، كوري، عبري…)
+ * يعني أن المحرك اختلقه من الضوضاء أو ظنّ اللغة خطأ.
+ */
+export function isForeignScript(text) {
+  const letters = String(text || '').match(/\p{L}/gu) || [];
+  if (!letters.length) return false;
+  const ok = letters.filter((c) => /[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-﻿A-Za-zÀ-ɏ]/.test(c)).length;
+  return ok / letters.length < 0.5;
+}
+
+/** هل تعرّف المحرك على لغة غير العربية والإنجليزية؟ (عندها يُعاد المقطع بالعربية) */
+export function isForeignResponse(resp) {
+  const lang = String((resp && resp.language) || '').toLowerCase();
+  if (lang && !['arabic', 'english', 'ar', 'en'].includes(lang)) return true;
+  return isForeignScript(resp && resp.text);
+}
 // كلمات قصيرة شائعة الاختلاق؛ تُحذف فقط إن كان المحرك يشك في وجود كلام.
 const SHORT_SUSPECT = ['you', 'thank you', 'bye', 'شكرا', 'نعم', 'ok'];
 
@@ -52,8 +74,10 @@ export function judge(resp, { prompt = '' } = {}) {
     const nsp = typeof s.no_speech_prob === 'number' ? s.no_speech_prob : 0;
     const lp = typeof s.avg_logprob === 'number' ? s.avg_logprob : 0;
     const cr = typeof s.compression_ratio === 'number' ? s.compression_ratio : 1;
-    if (nsp > 0.6 && lp < -0.7) continue;                         // غالبًا صمت
+    // الكلام البعيد الضعيف يرفع احتمال «لا كلام» عند المحرك رغم أنه كلام حقيقي؛ لا نحذف إلا عند يقين شبه تام.
+    if (nsp > 0.8 && lp < -1.0) continue;                          // غالبًا صمت
     if (isKnown(n)) continue;                                      // عبارة وهمية معروفة
+    if (isForeignScript(text)) continue;                           // حروف لغة أخرى: اختلاق
     if (n.length > 12 && nPrompt.includes(n)) continue;            // تسرّب من التوجيه
     if (SHORT_SUSPECT.includes(n) && (nsp > 0.3 || lp < -0.8)) continue;
     if (lp < -1.15 || cr > 2.4 || isLooping(text)) {               // المحرك غير واثق

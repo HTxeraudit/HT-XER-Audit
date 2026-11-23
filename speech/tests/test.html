@@ -166,11 +166,21 @@ eq('العامية لا تتغير', judge({ segments: [S('ازيك يا باش�
 eq('«اشتركوا في القناة» تُحذف', judge({ segments: [S('اشتركوا في القناة')] }).text, '');
 eq('«ترجمة نانسي قنقر» تُحذف', judge({ segments: [S('ترجمة نانسي قنقر')] }).text, '');
 eq('«Thank you for watching» تُحذف', judge({ segments: [S('Thank you for watching!')] }).text, '');
+eq('كلام بعيد ضعيف (المحرك متردد) يبقى ولا يُحذف', judge({ segments: [S('تعالى هنا يا محمد', { no_speech_prob: 0.7, avg_logprob: -0.85 })] }).text, 'تعالى هنا يا محمد');
+eq('كلام بعيد واطي جدًا مع التعلية والحساسية الجديدة: يُلتقط', runVad([quiet(1, 0.0002).map((v) => v * 14), speech(2, 0.0007, 0.0002).map((v) => v * 14), quiet(3, 0.0002).map((v) => v * 14)], { ratio: 1.8, absMin: 0.0015 }).length, 1);
 eq('مقطع صمت باحتمال عالٍ يُحذف', judge({ segments: [S('السلام عليكم', { no_speech_prob: 0.9, avg_logprob: -1.2 })] }).text, '');
 eq('كلام غير واثق = [غير واضح]', judge({ segments: [S('كلام مش مفهوم', { avg_logprob: -1.4 })] }).text, UNCLEAR);
 eq('تكرار حلقي = [غير واضح]', judge({ segments: [S('لا لا لا لا لا لا لا لا لا لا', { compression_ratio: 3 })] }).text, UNCLEAR);
 eq('واضح + غير واضح + واضح', judge({ segments: [S('أنا رايح'), S('xx', { avg_logprob: -1.5 }), S('الشغل بكرة')] }).text, 'أنا رايح [غير واضح] الشغل بكرة');
 eq('تسرّب جملة التوجيه يُحذف', judge({ segments: [S('وبعدين هبعتلك الـ report على الـ email')] }, { prompt: 'أنا عندي meeting بكرة الساعة ten، وبعدين هبعتلك الـ report على الـ email.' }).text, '');
+eq('الروسي الوهمي «Продолжение следует...» يُحذف', judge({ segments: [S('Продолжение следует...')] }).text, '');
+eq('أي كلام بحروف روسية أو صينية يُحذف', judge({ segments: [S('Привет как дела'), S('你好世界')] }).text, '');
+eq('العربي بعد الروسي الوهمي يبقى وحده', judge({ segments: [S('Продолжение следует...'), S('ممكن تشوف اللي تراديها دي')] }).text, 'ممكن تشوف اللي تراديها دي');
+{
+  const { isForeignResponse } = await import('../js/filter.js');
+  eq('لغة روسية مكتشفة = يُعاد المقطع بالعربي', isForeignResponse({ language: 'russian', text: 'Продолжение следует' }), true);
+  eq('لغة عربية أو إنجليزية = لا إعادة', [isForeignResponse({ language: 'arabic', text: 'ازيك' }), isForeignResponse({ language: 'English', text: 'hi' })], [false, false]);
+}
 eq('«Thank you» الحقيقية تبقى', judge({ segments: [S('Thank you')] }).text, 'Thank you');
 eq('«Thank you» مع شك في الصمت تُحذف', judge({ segments: [S('Thank you', { no_speech_prob: 0.5 })] }).text, '');
 
