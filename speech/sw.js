@@ -1,6 +1,6 @@
 // يحفظ ملفات الصفحة لتفتح بسرعة؛ يجلب النسخة الأحدث من الشبكة أولًا عند توفرها.
 // طلبات Groq لا تمر عبر هذا الملف (نطاق آخر وطريقة POST).
-const CACHE = 'htspeech-v4';
+const CACHE = 'htspeech-v5';
 const FILES = ['./', 'index.html', 'styles.css', 'js/app.js', 'js/transcript.js', 'js/recognizer.js', 'js/meter.js',
   'js/vad.js', 'js/wav.js', 'js/filter.js', 'js/groq.js', 'js/whisper_engine.js', 'js/capture-worklet.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];

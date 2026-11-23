@@ -1,9 +1,10 @@
-// محرك Whisper: التقاط الصوت بأنفسنا (تعلية + فلتر للزنّة + ضاغط) ثم تقطيعه جملًا وإرسالها إلى Groq.
+// محرك Whisper: التقاط الصوت بأنفسنا (فلتر للزنّة والصفير) ثم تقطيعه جملًا، وتعلية كل جملة لوحدها
+// لأعلى مستوى نظيف بلا تشويه، وإرسالها إلى Groq.
 // الأحداث: level, speechstart, speechend, pending{seq,at}, final{seq,text,failed}, error{code,fatal,message}
 
 import { Segmenter } from './vad.js';
-import { downsample, encodeWav } from './wav.js';
-import { transcribe, STYLE_PROMPT } from './groq.js';
+import { downsample, encodeWav, normalizeSpeech } from './wav.js';
+import { transcribe } from './groq.js';
 import { judge, isForeignResponse } from './filter.js';
 
 // مستويات تعلية الصوت. «far» للكلام البعيد (غرفة مجاورة): تعلية أقصى وحساسية أعلى لبداية الكلام.
@@ -22,13 +23,12 @@ const MAX_PER_MIN = 18;     // حد الخطة المجانية 20 طلبًا ف
 const CONCURRENCY = 2;
 
 export class WhisperEngine extends EventTarget {
-  constructor({ key, language = '', boost = 'medium', getContextText = () => '', firstSeq = 0, getStream = null } = {}) {
+  constructor({ key, language = '', boost = 'medium', firstSeq = 0, getStream = null } = {}) {
     super();
     this.getStream = getStream;       // ميكروفون مشترك تملكه الصفحة (إذن واحد طوال فتحها)
     this.key = key;
     this.language = language;
     this.boost = BOOST[boost] ? boost : 'medium';
-    this.getContextText = getContextText;
     this.seq = firstSeq;              // ترقيم متصل عبر الإيقاف والاستئناف
     this.queue = [];
     this.active = 0;
@@ -53,31 +53,29 @@ export class WhisperEngine extends EventTarget {
     hp.type = 'highpass'; hp.frequency.value = 90;
     const lp = ctx.createBiquadFilter();               // يحذف الصفير العالي الذي لا يحمل كلامًا
     lp.type = 'lowpass'; lp.frequency.value = 7500;
+    // مسار القياس: تعلية ثابتة تُستخدم فقط لمعرفة بداية الكلام ونهايته (لا تُرسل للمحرك).
     this.gain = ctx.createGain();
     this.gain.gain.value = b.gain;
-    const comp = ctx.createDynamicsCompressor();       // يرفع الواطي ولا يدع العالي يتشوّه
-    comp.threshold.value = -28; comp.knee.value = 12; comp.ratio.value = 10;
-    comp.attack.value = 0.003; comp.release.value = 0.25;
     const mute = ctx.createGain();
     mute.gain.value = 0;
-    src.connect(hp); hp.connect(lp); lp.connect(this.gain); this.gain.connect(comp);
+    src.connect(hp); hp.connect(lp); lp.connect(this.gain);
 
     this.segmenter = new Segmenter({ sampleRate: ctx.sampleRate, ratio: b.ratio, absMin: b.absMin });
     const onSamples = (raw, proc) => this._onSamples(raw, proc);
 
-    // قرار بداية الكلام ونهايته يُؤخذ من الصوت قبل الضاغط (تعلية ثابتة)، لأن الضاغط يرفع الهدوء بعد الكلام
-    // فتلتصق الجمل؛ أما الصوت المرسل للمحرك فهو بعد الضاغط.
+    // المدخل الأول = مسار القياس، المدخل الثاني = الصوت النظيف بلا تعلية ولا ضاغط (هو الذي يُحفظ ويُرسل،
+    // ثم تُعلّى كل جملة لوحدها عند انتهائها). الضاغط السابق كان يشوّه الكلام القريب فيكتب المحرك كلامًا خطأ.
     let sink;
     try {
       await ctx.audioWorklet.addModule(new URL('./capture-worklet.js', import.meta.url));
       sink = new AudioWorkletNode(ctx, 'capture-processor', { numberOfInputs: 2, numberOfOutputs: 1, outputChannelCount: [1] });
       sink.port.onmessage = (e) => onSamples(e.data.raw, e.data.proc);
       this.gain.connect(sink, 0, 0);
-      comp.connect(sink, 0, 1);
+      lp.connect(sink, 0, 1);
     } catch (_) {
       const merger = ctx.createChannelMerger(2);       // بديل للأجهزة القديمة
       this.gain.connect(merger, 0, 0);
-      comp.connect(merger, 0, 1);
+      lp.connect(merger, 0, 1);
       sink = ctx.createScriptProcessor(4096, 2, 1);
       sink.onaudioprocess = (e) => onSamples(
         new Float32Array(e.inputBuffer.getChannelData(0)), new Float32Array(e.inputBuffer.getChannelData(1)));
@@ -125,7 +123,7 @@ export class WhisperEngine extends EventTarget {
   _enqueue(audio, at) {
     const seq = this.seq++;
     const sr = this.ctx ? this.ctx.sampleRate : 48000;
-    const wav = encodeWav(downsample(audio, sr, 16000), 16000);
+    const wav = encodeWav(normalizeSpeech(downsample(audio, sr, 16000), 16000), 16000);
     this._emit('pending', { seq, at });
     this.queue.push({ seq, at, wav, tries: 0 });
     this._pump();
@@ -149,17 +147,15 @@ export class WhisperEngine extends EventTarget {
   }
 
   async _run(job) {
-    const ctxText = (this.getContextText() || '').slice(-120);
-    const prompt = (STYLE_PROMPT + ' ' + ctxText).trim();
+    // بلا جملة توجيه وبلا سياق: Whisper كان يعيد كتابة جملة التوجيه كأنها قيلت، وينقل غلط جملة لما بعدها.
     try {
-      let resp = await transcribe(job.wav, { key: this.key, language: this.language, prompt });
+      let resp = await transcribe(job.wav, { key: this.key, language: this.language });
       // في الوضع التلقائي: إن ظنّ المحرك اللغة روسية أو غيرها، نعيد المقطع مرة واحدة على أنه عربي،
       // حتى لا يضيع كلام حقيقي تُرجم خطأً؛ وإن كان ضوضاء فسيحذفه الفلتر بعدها.
       if (!this.language && isForeignResponse(resp)) {
-        resp = await transcribe(job.wav, { key: this.key, language: 'ar', prompt });
+        resp = await transcribe(job.wav, { key: this.key, language: 'ar' });
       }
-      // فحص التسرّب على جملة التوجيه الثابتة فقط؛ تكرار المتحدث لكلام قاله قبل ذلك كلام حقيقي لا يُحذف.
-      const { text } = judge(resp, { prompt: STYLE_PROMPT });
+      const { text } = judge(resp);
       this._emit('final', { seq: job.seq, text });
     } catch (err) {
       const code = err.code || 'server';

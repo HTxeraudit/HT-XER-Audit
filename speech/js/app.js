@@ -349,7 +349,6 @@ function buildWhisper() {
     key: groqKey(),
     language: settings.wlang,
     boost: 'far',                        // دائمًا أعلى تعلية تلقائيًا (طلب المستخدم)
-    getContextText: () => transcript.tail(160).replace(/\[[^\]]*\]/g, ' '),
   });
   w.addEventListener('level', (e) => setLevel(e.detail));
   w.addEventListener('speechstart', () => showCue());

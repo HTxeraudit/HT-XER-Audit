@@ -4,9 +4,8 @@
 export const GROQ_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
 export const GROQ_MODELS_URL = 'https://api.groq.com/openai/v1/models';
 
-// مثال يوجّه المحرك إلى: كتابة أي لهجة عربية كما نُطقت (مصري، سعودي وخليجي، شامي، عراقي، مغاربي…)
-// دون تحويلها إلى الفصحى، وكتابة الكلمات الإنجليزية بحروفها داخل الجملة دون ترجمة.
-export const STYLE_PROMPT = 'أنا عندي meeting بكرة الساعة ten. وش تبي الحين؟ شو بدك هلق؟ إيش رأيك؟ شنو صار؟ واش بغيتي؟ تمام، send me the report.';
+// لا نرسل جملة توجيه (prompt): التجربة على آيفون (23-11-2026) أظهرت أن Whisper يعيد كتابتها كأنها قيلت.
+// Whisper يكتب اللهجات العربية والإنجليزية كما سمعها دون توجيه.
 
 export class GroqError extends Error {
   constructor(code, message, retryAfter = 0) { super(message || code); this.code = code; this.retryAfter = retryAfter; }

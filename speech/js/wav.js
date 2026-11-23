@@ -15,6 +15,33 @@ export function downsample(input, fromRate, toRate = 16000) {
   return out;
 }
 
+/**
+ * تعلية جملة كاملة لأعلى مستوى نظيف: يُقاس مستوى الكلام في الجملة (لا أعلى قمة)،
+ * فيُرفع الكلام الواطي والبعيد حتى 30 ضعفًا، ولا يُمس الكلام العالي، وتُليَّن القمم فقط بدل أن تتكسّر.
+ */
+export function normalizeSpeech(x, sampleRate = 16000, { target = 0.2, maxGain = 30 } = {}) {
+  const frame = Math.max(1, Math.round(sampleRate * 0.02));
+  const levels = [];
+  for (let i = 0; i + frame <= x.length; i += frame) {
+    let s = 0;
+    for (let j = i; j < i + frame; j++) s += x[j] * x[j];
+    levels.push(Math.sqrt(s / frame));
+  }
+  if (!levels.length) return x;
+  levels.sort((a, b) => a - b);
+  const speech = levels[Math.floor(levels.length * 0.9)] || levels[levels.length - 1];
+  if (speech <= 1e-6) return x;
+  const g = Math.min(maxGain, target / speech);
+  if (g <= 1) return x;
+  const out = new Float32Array(x.length);
+  for (let i = 0; i < x.length; i++) {
+    const v = x[i] * g;
+    const a = Math.abs(v);
+    out[i] = a < 0.8 ? v : Math.sign(v) * (0.8 + 0.2 * Math.tanh((a - 0.8) / 0.2));
+  }
+  return out;
+}
+
 export function encodeWav(samples, sampleRate = 16000) {
   const buf = new ArrayBuffer(44 + samples.length * 2);
   const v = new DataView(buf);

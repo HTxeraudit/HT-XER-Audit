@@ -188,6 +188,18 @@ eq('«Thank you» الحقيقية تبقى', judge({ segments: [S('Thank you')]
 eq('«Thank you» مع شك في الصمت تُحذف', judge({ segments: [S('Thank you', { no_speech_prob: 0.5 })] }).text, '');
 
 {
+  const { normalizeSpeech } = await import('../js/wav.js');
+  const far = speech(2, 0.004, 0.0003);
+  const up = normalizeSpeech(far, SR);
+  let pk = 0; for (const v of up) pk = Math.max(pk, Math.abs(v));
+  const lvl = (a) => { let s = 0; for (const v of a) s += v * v; return Math.sqrt(s / a.length); };
+  eq('الكلام البعيد الواطي يُعلّى كثيرًا (×' + (lvl(up) / lvl(far)).toFixed(1) + ')', lvl(up) / lvl(far) > 10, true);
+  eq('بعد التعلية لا يتجاوز الصوت الحد (قمة ' + pk.toFixed(2) + ')', pk <= 1, true);
+  const near = speech(2, 0.6);
+  eq('الكلام القريب العالي لا يُلمس (بلا تشويه)', normalizeSpeech(near, SR) === near, true);
+}
+eq('جملة التوجيه لم تعد تُرسل', (await import('../js/groq.js')).STYLE_PROMPT, undefined);
+{
   const w = encodeWav(downsample(speech(1, 0.1).map((v) => v), 16000, 16000));
   eq('ملف WAV: الحجم صحيح لثانية واحدة', w.size, 44 + 16000 * 2);
   const d = downsample(new Float32Array(48000).fill(0.5), 48000, 16000);
