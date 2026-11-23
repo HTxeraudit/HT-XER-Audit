@@ -4,8 +4,9 @@
 export const GROQ_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
 export const GROQ_MODELS_URL = 'https://api.groq.com/openai/v1/models';
 
-// مثال يوجّه المحرك لكتابة الكلمات الإنجليزية بحروفها داخل الكلام العربي المصري، دون ترجمة.
-export const STYLE_PROMPT = 'أنا عندي meeting بكرة الساعة ten، وبعدين هبعتلك الـ report على الـ email. تمام، ماشي.';
+// مثال يوجّه المحرك إلى: كتابة أي لهجة عربية كما نُطقت (مصري، سعودي وخليجي، شامي، عراقي، مغاربي…)
+// دون تحويلها إلى الفصحى، وكتابة الكلمات الإنجليزية بحروفها داخل الجملة دون ترجمة.
+export const STYLE_PROMPT = 'أنا عندي meeting بكرة الساعة ten. وش تبي الحين؟ شو بدك هلق؟ إيش رأيك؟ شنو صار؟ واش بغيتي؟ تمام، send me the report.';
 
 export class GroqError extends Error {
   constructor(code, message, retryAfter = 0) { super(message || code); this.code = code; this.retryAfter = retryAfter; }

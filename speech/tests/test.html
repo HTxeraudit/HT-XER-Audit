@@ -181,6 +181,9 @@ eq('العربي بعد الروسي الوهمي يبقى وحده', judge({ se
   eq('لغة روسية مكتشفة = يُعاد المقطع بالعربي', isForeignResponse({ language: 'russian', text: 'Продолжение следует' }), true);
   eq('لغة عربية أو إنجليزية = لا إعادة', [isForeignResponse({ language: 'arabic', text: 'ازيك' }), isForeignResponse({ language: 'English', text: 'hi' })], [false, false]);
 }
+eq('سعودي يُكتب كما هو', judge({ segments: [S('وش تبي الحين يا خوي، أبي أروح البيت')] }).text, 'وش تبي الحين يا خوي، أبي أروح البيت');
+eq('شامي يُكتب كما هو', judge({ segments: [S('شو بدك هلق؟ ما بعرف والله')] }).text, 'شو بدك هلق؟ ما بعرف والله');
+eq('مغاربي يُكتب كما هو', judge({ segments: [S('واش بغيتي شي حاجة؟ بزاف مزيان')] }).text, 'واش بغيتي شي حاجة؟ بزاف مزيان');
 eq('«Thank you» الحقيقية تبقى', judge({ segments: [S('Thank you')] }).text, 'Thank you');
 eq('«Thank you» مع شك في الصمت تُحذف', judge({ segments: [S('Thank you', { no_speech_prob: 0.5 })] }).text, '');
 
